@@ -1,1 +1,24 @@
+{% from 'field-macro.html' import displayField %}
+{% extends "prelogin-layout.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+    <h2>Welcome!</h2>
+    <p>New to SafeChat? Create an account to get started.</p>
+
+    <form method="POST" action="{{ url_for('index') }}">
+        {{ displayField(form.username, 'Username', autocomplete="off", autofocus=true) }}
+        {{ displayField(form.password, 'Password') }}
+        {{ displayField(form.confirm_pswd, 'Retype Password') }}
+        <div class="form-group">
+            <button type="submit" class="btn btn-warning">Create Account</button>
+        </div>
+        {{ form.csrf_token }}
+    </form>
+
+    <hr>
+
+    <p>Already have an account? <a href="{{ url_for('login') }}">Log in here</a>.</p>
+{% endblock %}
 
