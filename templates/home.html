@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include Bootstrap CSS -->
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    .buttons {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        margin: 50px auto;
+        font-family: 'Arial', sans-serif;
+    }
+    .buttons h3 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .join {
+        display: flex;
+        gap: 10px;
+    }
+    .create-btn:hover, .join button:hover {
+        background-color: #0056b3;
+    }
+    .create-btn:hover {
+        background-color: #218838;
+    }
+    ul {
+        color: red;
+        padding-left: 20px;
+    }
+    /* Custom Footer Styling */
+    
+</style>
+
+<form method="post" class="buttons">
+    
+    <h3><b><font color="green">Welcome To SafeChat</font></b></h3>
+    <div class="form-group">
+    
+        <input type="text" class="form-control" id="name" name="name" placeholder="Please Enter Your Name" value="{{ name }}">
+    </div>
+    <div class="form-group join">
+        <input type="text" class="form-control" name="code" placeholder="Room Code" value="{{ code }}">
+        <button type="submit" class="btn btn-primary" name="join">Join</button>
+    </div>
+    <button type="submit" class="btn btn-success btn-block create-btn" name="create">Create Room</button>
+    {% if error %}
+        <ul>
+            <li>{{ error }}</li>
+        </ul>
+    {% endif %}
+</form>
+
+
+{% endblock %}
