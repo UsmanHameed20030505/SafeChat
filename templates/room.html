@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include Bootstrap CSS -->
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    .message-box {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 50px auto;
+        font-family: 'Arial', sans-serif;
+    }
+    .messages {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .text {
+        margin-bottom: 10px;
+    }
+    .text span {
+        display: block;
+    }
+    .text .muted {
+        color: #999;
+        font-size: 0.85em;
+    }
+    
+</style>
+
+<div class="message-box">
+    <h2 class="text-center text-primary"><b><font color="green">Chat Room: {{ code }} </font></b></h2>
+    <div class="messages" id="messages"></div>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Message" name="message" id="message">
+        <div class="input-group-append">
+            <button class="btn btn-success" type="button" name="send" id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var socketio = io();
+
+    const messages = document.getElementById("messages");
+
+    const createMessage = (name, msg) => {
+        const content = `
+        <div class="text">
+            <span><strong>${name}</strong>: ${msg}</span>
+            <span class="muted">${new Date().toLocaleString()}</span>
+        </div>`;
+        messages.innerHTML += content;
+    };
+
+    socketio.on("message", (data) => {
+        createMessage(data.name, data.message);
+    });
+
+    const sendMessage = () => {
+        const message = document.getElementById("message");
+        if (message.value === "") return;
+        socketio.emit("message", { data: message.value });
+        message.value = "";
+    };
+</script>
+
+{% for msg in messages %}
+<script type="text/javascript">
+    createMessage("{{ msg.name }}", "{{ msg.message }}");
+</script>
+{% endfor %}
+{% endblock %}
