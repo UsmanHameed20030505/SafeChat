@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- Include Bootstrap CSS -->
+<!-- Include Bootstrap CSS for responsive design and components -->
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
+    /* Style for the button container */
     .buttons {
         background-color: #f9f9f9;
         padding: 20px;
@@ -14,47 +15,59 @@
         margin: 50px auto;
         font-family: 'Arial', sans-serif;
     }
+    /* Style for the heading inside the button container */
     .buttons h3 {
         color: #333;
         text-align: center;
         margin-bottom: 20px;
     }
+    /* Style for the join section */
     .join {
         display: flex;
         gap: 10px;
     }
+    /* Style for button hover effects */
     .create-btn:hover, .join button:hover {
         background-color: #0056b3;
     }
+    /* Style for create button hover effect */
     .create-btn:hover {
         background-color: #218838;
     }
+    /* Style for error message list */
     ul {
         color: red;
         padding-left: 20px;
     }
     /* Custom Footer Styling */
-    
+    /* Add any custom footer styling here */
 </style>
 
+<!-- Form to handle user input for joining or creating a room -->
 <form method="post" class="buttons">
     
+    <!-- Welcome message -->
     <h3><b><font color="green">Welcome To SafeChat</font></b></h3>
+    <!-- Form group for name input -->
     <div class="form-group">
-    
+        <!-- Input field for the user's name -->
         <input type="text" class="form-control" id="name" name="name" placeholder="Please Enter Your Name" value="{{ name }}">
     </div>
+    <!-- Form group for joining a room -->
     <div class="form-group join">
+        <!-- Input field for the room code -->
         <input type="text" class="form-control" name="code" placeholder="Room Code" value="{{ code }}">
+        <!-- Button to join a room -->
         <button type="submit" class="btn btn-primary" name="join">Join</button>
     </div>
+    <!-- Button to create a new room -->
     <button type="submit" class="btn btn-success btn-block create-btn" name="create">Create Room</button>
+    <!-- Display error message if any -->
     {% if error %}
         <ul>
             <li>{{ error }}</li>
         </ul>
     {% endif %}
 </form>
-
 
 {% endblock %}
