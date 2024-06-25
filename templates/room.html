@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- Include Bootstrap CSS -->
+<!-- Include Bootstrap CSS for responsive design and components -->
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
+    /* Style for the message box container */
     .message-box {
         background-color: #f8f9fa;
         padding: 20px;
@@ -14,6 +15,7 @@
         margin: 50px auto;
         font-family: 'Arial', sans-serif;
     }
+    /* Style for the messages container */
     .messages {
         height: 300px;
         overflow-y: auto;
@@ -23,24 +25,32 @@
         border-radius: 5px;
         margin-bottom: 20px;
     }
+    /* Style for individual message text */
     .text {
         margin-bottom: 10px;
     }
+    /* Style for span elements within text */
     .text span {
         display: block;
     }
+    /* Style for muted text (timestamp) */
     .text .muted {
         color: #999;
         font-size: 0.85em;
     }
-    
 </style>
 
+<!-- Container for chat room interface -->
 <div class="message-box">
-    <h2 class="text-center text-primary"><b><font color="green">Chat Room: {{ code }} </font></b></h2>
+    <!-- Chat room header with room code displayed -->
+    <h2 class="text-center text-primary"><b><font color="green">Chat Room: {{ code }}</font></b></h2>
+    <!-- Div for displaying messages -->
     <div class="messages" id="messages"></div>
+    <!-- Input group for sending new messages -->
     <div class="input-group mb-3">
+        <!-- Input field for message content -->
         <input type="text" class="form-control" placeholder="Message" name="message" id="message">
+        <!-- Button to send the message -->
         <div class="input-group-append">
             <button class="btn btn-success" type="button" name="send" id="send-btn" onclick="sendMessage()">Send</button>
         </div>
@@ -48,33 +58,47 @@
 </div>
 
 <script type="text/javascript">
+    // Initialize Socket.IO
     var socketio = io();
 
+    // Reference to the messages div
     const messages = document.getElementById("messages");
 
+    // Function to create a new message element
     const createMessage = (name, msg) => {
+        // HTML content for a message
         const content = `
         <div class="text">
             <span><strong>${name}</strong>: ${msg}</span>
             <span class="muted">${new Date().toLocaleString()}</span>
         </div>`;
+        // Append the message content to the messages div
         messages.innerHTML += content;
     };
 
+    // Event listener for receiving messages from the server
     socketio.on("message", (data) => {
+        // Create and display the received message
         createMessage(data.name, data.message);
     });
 
+    // Function to send a message to the server
     const sendMessage = () => {
+        // Reference to the message input field
         const message = document.getElementById("message");
+        // If the message input is empty, do nothing
         if (message.value === "") return;
+        // Emit the message to the server
         socketio.emit("message", { data: message.value });
+        // Clear the message input field
         message.value = "";
     };
 </script>
 
+<!-- Loop to render existing messages from the server-side template context -->
 {% for msg in messages %}
 <script type="text/javascript">
+    // Create and display each existing message
     createMessage("{{ msg.name }}", "{{ msg.message }}");
 </script>
 {% endfor %}
