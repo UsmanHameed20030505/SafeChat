@@ -11,4 +11,7 @@ app.config["SECRET_KEY"] = "hjhjsdahhds"
 socketio = SocketIO(app)
 # Dictionary to store room information (members and messages)
 rooms = {}
+def generate_unique_code(length):
+    """Generate a unique room code of given length."""
+    while True:
 
