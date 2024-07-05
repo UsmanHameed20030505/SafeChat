@@ -14,4 +14,11 @@ rooms = {}
 def generate_unique_code(length):
     """Generate a unique room code of given length."""
     while True:
+        # Generate a random code consisting of uppercase letters
+        code = "".join(random.choice(ascii_uppercase) for _ in range(length))
+        # Ensure the generated code is unique (not already in use)
+        if code not in rooms:
+            break
+    return code
+
 
