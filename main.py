@@ -9,3 +9,6 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "hjhjsdahhds"
 # Initialize Flask-SocketIO for real-time communication
 socketio = SocketIO(app)
+# Dictionary to store room information (members and messages)
+rooms = {}
+
