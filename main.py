@@ -20,5 +20,9 @@ def generate_unique_code(length):
         if code not in rooms:
             break
     return code
+@app.route("/", methods=["POST", "GET"])
+def home():
+    # Clear session data on loading the home page
+    session.clear()
 
 
