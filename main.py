@@ -28,6 +28,19 @@ def home():
         # Get the name from the form input
         name = request.form.get("name")
         # Get the room code from the form input
+        code = request.form.get("code")
+        # Check if the join button was pressed
+        join = request.form.get("join", False)
+        # Check if the create button was pressed
+        create = request.form.get("create", False)
+
+        # Validate the form input
+        if not name:
+            # If the name is not provided, display an error message
+            return render_template("home.html", error="Please Enter Your Name.", code=code, name=name)
+        if join != False and not code:
+            # If joining a room and no code is provided, display an error message
+            return render_template("home.html", error="Please Enter Your Room Code.", code=code, name=name)
         
 
 
