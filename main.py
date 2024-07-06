@@ -41,6 +41,13 @@ def home():
         if join != False and not code:
             # If joining a room and no code is provided, display an error message
             return render_template("home.html", error="Please Enter Your Room Code.", code=code, name=name)
+
+        room = code  # Use the provided room code
+        if create != False:
+            # If creating a new room, generate a unique room code
+            room = generate_unique_code(4)
+            # Create a new room with initial member count and message list
+            rooms[room] = {"members": 0, "messages": []}
         
 
 
