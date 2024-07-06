@@ -24,5 +24,10 @@ def generate_unique_code(length):
 def home():
     # Clear session data on loading the home page
     session.clear()
+    if request.method == "POST":
+        # Get the name from the form input
+        name = request.form.get("name")
+        # Get the room code from the form input
+        
 
 
