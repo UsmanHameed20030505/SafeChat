@@ -48,6 +48,9 @@ def home():
             room = generate_unique_code(4)
             # Create a new room with initial member count and message list
             rooms[room] = {"members": 0, "messages": []}
+        elif code not in rooms:
+            # If the room code does not exist, display an error message
+            return render_template("home.html", error="Room Does Not Exist.", code=code, name=name)
         
 
 
