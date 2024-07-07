@@ -51,6 +51,11 @@ def home():
         elif code not in rooms:
             # If the room code does not exist, display an error message
             return render_template("home.html", error="Room Does Not Exist.", code=code, name=name)
+        # Save the room and name in the session
+        session["room"] = room
+        session["name"] = name
+        # Redirect to the room page
+        return redirect(url_for("room"))
         
 
 
