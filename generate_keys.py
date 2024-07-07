@@ -4,3 +4,6 @@ def generate_keys(username):
     key = RSA.generate(2048)
     # Export the private key in PEM format
     private_key = key.export_key()
+    # Export the public key in PEM format
+    public_key = key.publickey().export_key()
+    
