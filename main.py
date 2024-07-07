@@ -56,6 +56,8 @@ def home():
         session["name"] = name
         # Redirect to the room page
         return redirect(url_for("room"))
+    # Render the home page template
+    return render_template("home.html")
         
 
 
