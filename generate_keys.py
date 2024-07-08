@@ -12,5 +12,6 @@ def generate_keys(username):
     # Save the public key to a file with the username in the filename
     with open(f'{username}_public.pem', 'wb') as pub_file:
         pub_file.write(public_key)
-    
+    # Print a message indicating that the keys were generated successfully
+    print(f'Keys generated for {username}')
     
