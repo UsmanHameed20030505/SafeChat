@@ -9,5 +9,8 @@ def generate_keys(username):
     # Save the private key to a file with the username in the filename
     with open(f'{username}_private.pem', 'wb') as priv_file:
         priv_file.write(private_key)
+    # Save the public key to a file with the username in the filename
+    with open(f'{username}_public.pem', 'wb') as pub_file:
+        pub_file.write(public_key)
     
     
