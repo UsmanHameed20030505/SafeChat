@@ -6,4 +6,8 @@ def generate_keys(username):
     private_key = key.export_key()
     # Export the public key in PEM format
     public_key = key.publickey().export_key()
+    # Save the private key to a file with the username in the filename
+    with open(f'{username}_private.pem', 'wb') as priv_file:
+        priv_file.write(private_key)
+    
     
