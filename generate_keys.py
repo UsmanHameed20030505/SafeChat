@@ -14,4 +14,7 @@ def generate_keys(username):
         pub_file.write(public_key)
     # Print a message indicating that the keys were generated successfully
     print(f'Keys generated for {username}')
+# Example usage
+generate_keys('user1')
+generate_keys('user2')
     
