@@ -66,6 +66,8 @@ def room():
     # Redirect to the home page if the room or name is not in the session or the room does not exist
     if room is None or name is None or room not in rooms:
         return redirect(url_for("home"))
+    # Render the room page template with the room code and messages
+    return render_template("room.html", code=room, messages=rooms[room]["messages"])
         
 
 
