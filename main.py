@@ -58,6 +58,14 @@ def home():
         return redirect(url_for("room"))
     # Render the home page template
     return render_template("home.html")
+@app.route("/room")
+def room():
+    # Get the room and name from the session
+    room = session.get("room")
+    name = session.get("name")
+    # Redirect to the home page if the room or name is not in the session or the room does not exist
+    if room is None or name is None or room not in rooms:
+        return redirect(url_for("home"))
         
 
 
