@@ -75,6 +75,17 @@ def message(data):
     # Ensure the room exists
     if room not in rooms:
         return 
+    # Create the content to send
+    content = {
+        "name": session.get("name"),
+        "message": data["data"]
+    }
+    # Broadcast the message to the room
+    send(content, to=room)
+    # Add the message to the room's message list
+    rooms[room]["messages"].append(content)
+    # Print the message for debugging purposes
+    print(f"{session.get('name')} said: {data['data']}")
         
 
 
