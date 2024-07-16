@@ -68,6 +68,13 @@ def room():
         return redirect(url_for("home"))
     # Render the room page template with the room code and messages
     return render_template("room.html", code=room, messages=rooms[room]["messages"])
+@socketio.on("message")
+def message(data):
+    """Handle incoming messages and broadcast to the room."""
+    room = session.get("room")
+    # Ensure the room exists
+    if room not in rooms:
+        return 
         
 
 
