@@ -92,5 +92,11 @@ def connect(auth):
     """Handle a new connection to the chat room."""
     room = session.get("room")
     name = session.get("name")
+    # Ensure the room and name are valid
+    if not room or not name:
+        return
+    if room not in rooms:
+        leave_room(room)
+        return
 
 
