@@ -87,5 +87,10 @@ def message(data):
     # Print the message for debugging purposes
     print(f"{session.get('name')} said: {data['data']}")
         
+@socketio.on("connect")
+def connect(auth):
+    """Handle a new connection to the chat room."""
+    room = session.get("room")
+    name = session.get("name")
 
 
