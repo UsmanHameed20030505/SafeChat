@@ -98,5 +98,9 @@ def connect(auth):
     if room not in rooms:
         leave_room(room)
         return
+    # Join the room
+    join_room(room)
+    # Notify the room that a new user has joined
+    send({"name": name, "message": "has entered the room"}, to=room)
 
 
