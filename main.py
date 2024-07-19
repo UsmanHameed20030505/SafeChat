@@ -109,3 +109,8 @@ def connect(auth):
 
 @socketio.on("disconnect")
 def disconnect():
+    """Handle disconnection from the chat room."""
+    room = session.get("room")
+    name = session.get("name")
+    # Leave the room
+    leave_room(room)
