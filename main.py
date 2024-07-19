@@ -98,13 +98,12 @@ def connect(auth):
     if room not in rooms:
         leave_room(room)
         return
-@socketio.on("disconnect")
-def disconnect():
     # Join the room
     join_room(room)
     # Notify the room that a new user has joined
     send({"name": name, "message": "has entered the room"}, to=room)
+    # Increment the member count
+    rooms[room]["members"] += 1
     # Print a message for debugging purposes
     print(f"{name} joined room {room}")
-
 
