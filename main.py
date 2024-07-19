@@ -98,6 +98,8 @@ def connect(auth):
     if room not in rooms:
         leave_room(room)
         return
+@socketio.on("disconnect")
+def disconnect():
     # Join the room
     join_room(room)
     # Notify the room that a new user has joined
