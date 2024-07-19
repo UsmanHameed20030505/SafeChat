@@ -107,3 +107,5 @@ def connect(auth):
     # Print a message for debugging purposes
     print(f"{name} joined room {room}")
 
+@socketio.on("disconnect")
+def disconnect():
