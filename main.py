@@ -114,3 +114,10 @@ def disconnect():
     name = session.get("name")
     # Leave the room
     leave_room(room)
+    
+    if room in rooms:
+        # Decrement the member count
+        rooms[room]["members"] -= 1
+        # Delete the room if no members are left
+        if rooms[room]["members"] <= 0:
+            del rooms[room]
