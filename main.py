@@ -121,3 +121,7 @@ def disconnect():
         # Delete the room if no members are left
         if rooms[room]["members"] <= 0:
             del rooms[room]
+    # Notify the room that a user has left
+    send({"name": name, "message": "has left the room"}, to=room)
+    # Print a message for debugging purposes
+    print(f"{name} has left the room {room}")
