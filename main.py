@@ -125,3 +125,6 @@ def disconnect():
     send({"name": name, "message": "has left the room"}, to=room)
     # Print a message for debugging purposes
     print(f"{name} has left the room {room}")
+# Run the app with debugging enabled
+if __name__ == "__main__":
+    socketio.run(app, debug=True)
