@@ -100,12 +100,10 @@ def connect(auth):
         return
     # Join the room
     join_room(room)
-    # Notify the room that a new user has joined
-    send({"name": name, "message": "has entered the room"}, to=room)
-    # Increment the member count
     rooms[room]["members"] += 1
-    # Print a message for debugging purposes
-    print(f"{name} joined room {room}")
+    # Broadcast a message to notify about the new user joining the room
+    emit("message", {"name": name, "message": "has entered the room."}, to=room)
+    
 
 @socketio.on("disconnect")
 def disconnect():
@@ -121,10 +119,9 @@ def disconnect():
         # Delete the room if no members are left
         if rooms[room]["members"] <= 0:
             del rooms[room]
-    # Notify the room that a user has left
-    send({"name": name, "message": "has left the room"}, to=room)
-    # Print a message for debugging purposes
-    print(f"{name} has left the room {room}")
+        # Broadcast a message to notify about the user leaving the room
+        emit("message", {"name": name, "message": "has left the room."}, to=room)
+    
 # Run the app with debugging enabled
 if __name__ == "__main__":
     socketio.run(app, debug=True)
