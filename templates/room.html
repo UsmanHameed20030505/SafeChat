@@ -45,7 +45,15 @@
     <!-- Chat room header with room code displayed -->
     <h2 class="text-center text-primary"><b><font color="green">Chat Room: {{ code }}</font></b></h2>
     <!-- Div for displaying messages -->
-    <div class="messages" id="messages"></div>
+    <div class="messages" id="messages">
+        <!-- Loop to render existing messages from the server-side template context -->
+        {% for msg in messages %}
+        <div class="text">
+            <span><strong>{{ msg.name }}</strong>: {{ msg.message }}</span>
+            <span class="muted">{{ msg.timestamp }}</span>
+        </div>
+        {% endfor %}
+    </div>
     <!-- Input group for sending new messages -->
     <div class="input-group mb-3">
         <!-- Input field for message content -->
@@ -57,49 +65,88 @@
     </div>
 </div>
 
-<script type="text/javascript">
-    // Initialize Socket.IO
+<script src="/socket.io/socket.io.js"></script>
+<script>
     var socketio = io();
 
-    // Reference to the messages div
     const messages = document.getElementById("messages");
 
-    // Function to create a new message element
-    const createMessage = (name, msg) => {
-        // HTML content for a message
-        const content = `
-        <div class="text">
-            <span><strong>${name}</strong>: ${msg}</span>
-            <span class="muted">${new Date().toLocaleString()}</span>
-        </div>`;
-        // Append the message content to the messages div
-        messages.innerHTML += content;
-    };
+    // Fetch the server's public key
+    let serverPublicKey;
+    fetch('/public_key')
+        .then(response => response.text())
+        .then(data => {
+            const pemHeader = "-----BEGIN PUBLIC KEY-----";
+            const pemFooter = "-----END PUBLIC KEY-----";
+            const pemKey = data.substring(
+                data.indexOf(pemHeader) + pemHeader.length,
+                data.indexOf(pemFooter)
+            ).replace(/\s/g, '');
+            serverPublicKey = window.crypto.subtle.importKey(
+                'spki',
+                base64ToArrayBuffer(pemKey),
+                {
+                    name: 'RSA-OAEP',
+                    hash: 'SHA-256'
+                },
+                true,
+                ['encrypt']
+            );
+        });
 
-    // Event listener for receiving messages from the server
-    socketio.on("message", (data) => {
-        // Create and display the received message
-        createMessage(data.name, data.message);
+    // Function to send a message
+    function sendMessage() {
+        const messageInput = document.getElementById("message");
+        const message = messageInput.value;
+        messageInput.value = "";
+
+        if (!message) {
+            return;
+        }
+
+        // Encrypt the message using the server's public key
+        serverPublicKey.then(publicKey => {
+            window.crypto.subtle.encrypt(
+                {
+                    name: 'RSA-OAEP'
+                },
+                publicKey,
+                new TextEncoder().encode(message)
+            ).then(encrypted => {
+                const base64Message = arrayBufferToBase64(encrypted);
+                socketio.emit("message", { data: base64Message });
+            });
+        });
+    }
+
+    // Function to handle incoming messages
+    socketio.on("message", function(data) {
+        const newMessage = document.createElement("div");
+        newMessage.classList.add("text");
+        newMessage.innerHTML = `<span><strong>${data.name}</strong>: ${data.message}</span><span class="muted">${data.timestamp}</span>`;
+        messages.appendChild(newMessage);
     });
 
-    // Function to send a message to the server
-    const sendMessage = () => {
-        // Reference to the message input field
-        const message = document.getElementById("message");
-        // If the message input is empty, do nothing
-        if (message.value === "") return;
-        // Emit the message to the server
-        socketio.emit("message", { data: message.value });
-        // Clear the message input field
-        message.value = "";
-    };
-</script>
+    // Utility function to convert ArrayBuffer to Base64
+    function arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
 
-<!-- Loop to render existing messages from the server-side template context -->
-{% for msg in messages %}
-<script type="text/javascript">
-    // Create and display each existing message
-    createMessage("{{ msg.name }}", "{{ msg.message }}");
+    // Utility function to convert Base64 to ArrayBuffer
+    function base64ToArrayBuffer(base64) {
+        const binary_string = window.atob(base64);
+        const len = binary_string.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
 </script>
-{% endfor %}
 {% endblock %}
