@@ -20,6 +20,20 @@ def generate_unique_code(length):
         if code not in rooms:
             break
     return code
+
+# Generate RSA keys for the server
+server_private_key = rsa.generate_private_key(
+    public_exponent=65537,
+    key_size=2048
+)
+server_public_key = server_private_key.public_key()
+
+# Serialize the server's public key to PEM format
+server_public_pem = server_public_key.public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo
+).decode()
+
 @app.route("/", methods=["POST", "GET"])
 def home():
     # Clear session data on loading the home page
@@ -56,8 +70,10 @@ def home():
         session["name"] = name
         # Redirect to the room page
         return redirect(url_for("room"))
+    
     # Render the home page template
     return render_template("home.html")
+
 @app.route("/room")
 def room():
     # Get the room and name from the session
@@ -66,8 +82,18 @@ def room():
     # Redirect to the home page if the room or name is not in the session or the room does not exist
     if room is None or name is None or room not in rooms:
         return redirect(url_for("home"))
+
     # Render the room page template with the room code and messages
     return render_template("room.html", code=room, messages=rooms[room]["messages"])
+    
+    # Render the room page template with the room code and messages
+    return render_template("room.html", code=room, messages=rooms[room]["messages"])
+
+@app.route("/public_key")
+def get_public_key():
+    """Serve the server's public key."""
+    return server_public_pem
+
 @socketio.on("message")
 def message(data):
     """Handle incoming messages and broadcast to the room."""
@@ -80,12 +106,22 @@ def message(data):
         "name": session.get("name"),
         "message": data["data"]
     }
-    # Broadcast the message to the room
-    send(content, to=room)
-    # Add the message to the room's message list
-    rooms[room]["messages"].append(content)
-    # Print the message for debugging purposes
-    print(f"{session.get('name')} said: {data['data']}")
+    # Decrypt the message using the server's private key
+    decrypted_message = server_private_key.decrypt(
+        base64.b64decode(message),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    ).decode()
+
+    # Create a message dictionary
+    msg = {"name": name, "message": decrypted_message}
+    # Append the message to the room's message list
+    rooms[room]["messages"].append(msg)
+    # Broadcast the message to all clients in the room
+    emit("message", msg, to=room)
         
 @socketio.on("connect")
 def connect(auth):
@@ -95,9 +131,7 @@ def connect(auth):
     # Ensure the room and name are valid
     if not room or not name:
         return
-    if room not in rooms:
-        leave_room(room)
-        return
+    
     # Join the room
     join_room(room)
     rooms[room]["members"] += 1
