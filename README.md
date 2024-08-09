@@ -3,7 +3,7 @@ SafeChat is a proposed name for a chat application that suggests a secure, dynam
 
 # Vercel Link : https://safe-chat-mu.vercel.app/
 
-# References: https://www.stackflow.com/
+# References:
           https://stackoverflow.com/questions/19150220/creating-rooms-in-socket-io
           https://www.kaggle.com/code/ameythakur20/chat-application-socket-programming/notebook
           https://www.youtube.com/watch?v=KLqcjBatPgg
