@@ -1,16 +1,20 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_socketio import join_room, leave_room, send, SocketIO
+from flask_socketio import join_room, leave_room, emit, SocketIO
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import hashes, serialization
 import random
 from string import ascii_uppercase
+import base64
+from datetime import datetime
 
 # Initialize the Flask application
 app = Flask(__name__)
-# Set a secret key for session management
-app.config["SECRET_KEY"] = "hjhjsdahhds"
-# Initialize Flask-SocketIO for real-time communication
-socketio = SocketIO(app)
+app.config["SECRET_KEY"] = "hjhjsdahhds"  # Secret key for session management
+socketio = SocketIO(app)  # Initialize Flask-SocketIO for real-time communication
+
 # Dictionary to store room information (members and messages)
 rooms = {}
+
 def generate_unique_code(length):
     """Generate a unique room code of given length."""
     while True:
@@ -38,6 +42,7 @@ server_public_pem = server_public_key.public_bytes(
 def home():
     # Clear session data on loading the home page
     session.clear()
+
     if request.method == "POST":
         # Get the name from the form input
         name = request.form.get("name")
@@ -50,12 +55,11 @@ def home():
 
         # Validate the form input
         if not name:
-            # If the name is not provided, display an error message
             return render_template("home.html", error="Please Enter Your Name.", code=code, name=name)
-        if join != False and not code:
-            # If joining a room and no code is provided, display an error message
-            return render_template("home.html", error="Please Enter Your Room Code.", code=code, name=name)
 
+        if join != False and not code:
+            return render_template("home.html", error="Please Enter Your Room Code.", code=code, name=name)
+        
         room = code  # Use the provided room code
         if create != False:
             # If creating a new room, generate a unique room code
@@ -65,12 +69,13 @@ def home():
         elif code not in rooms:
             # If the room code does not exist, display an error message
             return render_template("home.html", error="Room Does Not Exist.", code=code, name=name)
+        
         # Save the room and name in the session
         session["room"] = room
         session["name"] = name
         # Redirect to the room page
         return redirect(url_for("room"))
-    
+
     # Render the home page template
     return render_template("home.html")
 
@@ -79,13 +84,11 @@ def room():
     # Get the room and name from the session
     room = session.get("room")
     name = session.get("name")
+
     # Redirect to the home page if the room or name is not in the session or the room does not exist
     if room is None or name is None or room not in rooms:
         return redirect(url_for("home"))
 
-    # Render the room page template with the room code and messages
-    return render_template("room.html", code=room, messages=rooms[room]["messages"])
-    
     # Render the room page template with the room code and messages
     return render_template("room.html", code=room, messages=rooms[room]["messages"])
 
@@ -95,67 +98,81 @@ def get_public_key():
     return server_public_pem
 
 @socketio.on("message")
-def message(data):
+def handle_message(data):
     """Handle incoming messages and broadcast to the room."""
     room = session.get("room")
-    # Ensure the room exists
     if room not in rooms:
-        return 
-    # Create the content to send
-    content = {
-        "name": session.get("name"),
-        "message": data["data"]
-    }
-    # Decrypt the message using the server's private key
-    decrypted_message = server_private_key.decrypt(
-        base64.b64decode(message),
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    ).decode()
+        return
 
-    # Create a message dictionary
-    msg = {"name": name, "message": decrypted_message}
-    # Append the message to the room's message list
-    rooms[room]["messages"].append(msg)
-    # Broadcast the message to all clients in the room
-    emit("message", msg, to=room)
-        
+    name = session.get("name")
+    encrypted_message = data["data"]
+
+    # Log the encrypted message to the terminal for debugging
+    print(f"Encrypted message received: {encrypted_message}")
+
+    try:
+        # Decrypt the message using the server's private key
+        decrypted_message = server_private_key.decrypt(
+            base64.b64decode(encrypted_message),
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        ).decode()
+
+        # Log the decrypted message to the terminal
+        print(f"Decrypted message: {decrypted_message}")
+
+        # Add a timestamp to the message
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        msg = {"name": name, "message": decrypted_message, "time": timestamp}
+
+        # Append the message to the room's message list
+        rooms[room]["messages"].append(msg)
+        # Broadcast the decrypted message to all clients in the room
+        emit("message", msg, to=room)
+
+    except Exception as e:
+        # Log any decryption errors
+        print(f"Decryption error: {e}")
+
 @socketio.on("connect")
 def connect(auth):
-    """Handle a new connection to the chat room."""
+    """Handle client connections."""
     room = session.get("room")
     name = session.get("name")
-    # Ensure the room and name are valid
-    if not room or not name:
-        return
     
-    # Join the room
+    # Check if the room and name exist in the session and if the room exists
+    if not room or not name or room not in rooms:
+        return
+
+    # Mark the user as a member of the room
     join_room(room)
+    # Increase the member count in the room
     rooms[room]["members"] += 1
     # Broadcast a message to notify about the new user joining the room
-    emit("message", {"name": name, "message": "has entered the room."}, to=room)
-    
+    emit("message", {"name": name, "message": "has entered the room.", "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, to=room)
 
 @socketio.on("disconnect")
 def disconnect():
-    """Handle disconnection from the chat room."""
+    """Handle client disconnections."""
     room = session.get("room")
     name = session.get("name")
     # Leave the room
     leave_room(room)
-    
+
+    # Validate the room
     if room in rooms:
-        # Decrement the member count
+        # Decrease the member count in the room
         rooms[room]["members"] -= 1
-        # Delete the room if no members are left
+        # If there are no more members in the room, delete the room
         if rooms[room]["members"] <= 0:
             del rooms[room]
+
         # Broadcast a message to notify about the user leaving the room
-        emit("message", {"name": name, "message": "has left the room."}, to=room)
-    
-# Run the app with debugging enabled
+        emit("message", {"name": name, "message": "has left the room.", "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, to=room)
+
 if __name__ == "__main__":
+    # Run the Flask application with SocketIO support
     socketio.run(app, debug=True)
