@@ -10,6 +10,9 @@ SafeChat is a proposed name for a chat application that suggests a secure, dynam
           https://www.youtube.com/watch?v=n0uJsqFGO4k&t=95s
           https://stackoverflow.com/questions/5244129/use-rsa-private-key-to-generate-public-key
 
+# Google Doc link : https://docs.google.com/document/d/1E15DjTQOq4TGkJRWX3eNpLjMLvKfmW7J0ny8YHT6LNI/edit?usp=sharing
+
+
 
 
 
